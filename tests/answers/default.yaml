@@ -1,0 +1,10 @@
+# Headless answers for the "default" test case.
+# Prompt keys come from the composed archetect-common libraries (snake_case).
+# Anything not listed here falls back to prompt defaults via `archetect render -D`.
+author_name: "Test Author"
+author_email: "test@example.com"
+org_name: "acme"
+solution_name: "widgets"
+prefix_name: "inventory"
+suffix_name: "Service"
+image_registry: "registry.example.com/acme"

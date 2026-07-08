@@ -1,0 +1,73 @@
+name: Test Archetype
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  ARCHETECT_VERSION: "3.0.0"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install archetect
+        run: |
+          curl -fsSLO "https://github.com/archetect/archetect/releases/download/v${ARCHETECT_VERSION}/archetect-v${ARCHETECT_VERSION}-linux-x86_64.tar.gz"
+          curl -fsSLO "https://github.com/archetect/archetect/releases/download/v${ARCHETECT_VERSION}/archetect-v${ARCHETECT_VERSION}-linux-x86_64.tar.gz.sha256"
+          sha256sum -c "archetect-v${ARCHETECT_VERSION}-linux-x86_64.tar.gz.sha256"
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf "archetect-v${ARCHETECT_VERSION}-linux-x86_64.tar.gz" -C "$HOME/.local/bin" --strip-components=1
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/archetect" --version
+
+      # The archetype composes libraries via git@github.com: SSH sources. Runners have
+      # no SSH key, so rewrite them to token-authenticated HTTPS. GITHUB_TOKEN reaches
+      # the public archetect-common libraries; for the internal p6m-archetypes libraries
+      # (dotnet-ci-library, platform-application-manifests-library) it only works if
+      # those repos grant org-wide Actions access (Settings -> Actions -> General ->
+      # Access). Otherwise, set the ARCHETYPE_LIBS_TOKEN org secret to a read-only
+      # fine-grained PAT covering the p6m-archetypes org.
+      - name: Configure git access to library sources
+        env:
+          TOKEN: ${{ secrets.ARCHETYPE_LIBS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "git@github.com:"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Keep in step with the TargetFramework in contents/base
+          dotnet-version: "9.0.x"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: tests/uv.lock
+
+      - name: Run tests
+        working-directory: tests
+        run: uv run pytest -v -ra
+
+      - name: Upload rendered project on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-project
+          path: /tmp/pytest-of-*/
+          if-no-files-found: ignore
+          retention-days: 5

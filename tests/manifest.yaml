@@ -1,0 +1,45 @@
+# Test cases for this archetype. Each case is rendered once per pytest session
+# and shared by all tests that reference it.
+#
+# Fields:
+#   name           unique case id (shows up in test names)
+#   answers        answers file passed to `archetect render -A`, relative to tests/
+#   project_dir    directory the render is expected to produce (derived from the answers)
+#   expected_files paths (relative to project_dir) that must exist after rendering
+#   requires       executables that must be on PATH for the build tier; missing -> build tests skip
+#   build_steps    commands run sequentially inside project_dir by the build tier
+#   env            extra environment variables for build_steps
+#   yaml_globs     globs (relative to project_dir) of generated files that must parse
+#                  as valid YAML; each glob must match at least one file
+cases:
+  - name: default
+    answers: answers/default.yaml
+    project_dir: inventory-service
+    expected_files:
+      - InventoryService.sln
+      - InventoryService/InventoryService.csproj
+      - InventoryService/Program.cs
+      - InventoryService/Settings.cs
+      - InventoryService/appsettings.json
+      - InventoryService.Tests/InventoryService.Tests.csproj
+      - InventoryService.Tests/HealthTests.cs
+      - .github/workflows/build.yaml
+      - .github/workflows/cut-tag.yaml
+      - .platform/docker/local/Dockerfile
+      - .platform/docker/prd/Dockerfile
+      - .platform/kubernetes/base/application.yaml
+      - .platform/kubernetes/dev/kustomization.yaml
+      - .editorconfig
+      - .gitattributes
+      - .gitignore
+    yaml_globs:
+      - ".platform/kubernetes/**/*.yaml"
+      - ".github/workflows/*.yaml"
+    requires:
+      - dotnet
+    build_steps:
+      - [dotnet, build, --nologo]
+      - [dotnet, test, --nologo]
+    env:
+      # Let the generated net9.0 project build/test on machines with only a newer SDK.
+      DOTNET_ROLL_FORWARD: Major
