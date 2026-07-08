@@ -13,7 +13,7 @@ no leftover template placeholders, valid YAML), and builds and tests the generat
 in the harness repo.
 
 ```sh
-uvx --from git+https://github.com/p6m-archetypes/archetype-test-harness@dev archetype-test
+uvx --from git+https://github.com/p6m-archetypes/archetype-test-harness@main archetype-test
 uvx --from ../archetype-test-harness archetype-test   # sibling checkout variant
 archetype-test -m "not build"                          # fast tier only (no .NET SDK required)
 ```

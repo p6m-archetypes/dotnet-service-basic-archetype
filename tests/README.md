@@ -26,7 +26,7 @@ From the repo root (or this directory):
 uvx --from ../archetype-test-harness archetype-test
 
 # anywhere, against the published harness:
-uvx --from git+https://github.com/p6m-archetypes/archetype-test-harness@dev archetype-test
+uvx --from git+https://github.com/p6m-archetypes/archetype-test-harness@main archetype-test
 ```
 
 Extra arguments pass through to pytest:

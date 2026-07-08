@@ -11,8 +11,9 @@ concurrency:
 
 jobs:
   test:
-    uses: p6m-archetypes/archetype-test-harness/.github/workflows/archetype-test.yaml@dev
+    uses: p6m-archetypes/archetype-test-harness/.github/workflows/archetype-test.yaml@main
     with:
+      harness-ref: main
       toolchain: dotnet
       # Keep in step with the TargetFramework in contents/base
       toolchain-version: "9.0.x"
