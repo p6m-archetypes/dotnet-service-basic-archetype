@@ -1,5 +1,5 @@
 using System.Net;
-using {{ PrefixName }}{{ SuffixName }};
+using {{ ProjectName }};
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
