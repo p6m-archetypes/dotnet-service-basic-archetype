@@ -14,6 +14,26 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    // The platform env contract (S3): PAO injects UPPER_SNAKE variables (SERVER_PORT,
+    // MANAGEMENT_PORT, HOST). .NET's default binder matches PROPERTY names, not those, so map each
+    // contract variable that is present onto its Settings key before binding — without this the
+    // service silently ignores the ports the platform gave it and binds its compiled-in defaults.
+    // Property-name env (Port=...) still works; the contract layers on top. A basic service weaves
+    // in no resources, so the three keys here are the whole contract it has to honor.
+    var platformEnv = new Dictionary<string, string>
+    {
+        ["HOST"] = "Host",
+        ["SERVER_PORT"] = "Port",
+        ["MANAGEMENT_PORT"] = "ManagementPort",
+    };
+    var contractOverrides = new Dictionary<string, string?>();
+    foreach (var (env, key) in platformEnv)
+    {
+        if (builder.Configuration[env] is { Length: > 0 } value) contractOverrides[key] = value;
+    }
+    builder.Configuration.AddInMemoryCollection(contractOverrides);
+
     var settings = builder.Configuration.Get<Settings>() ?? new Settings();
 
     // Structured logging via Serilog (JSON when LOGGING_STRUCTURED=true)

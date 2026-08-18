@@ -1,0 +1,24 @@
+name: Acceptance
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # No language toolchain step (S8b): the suite renders, inspects, and builds the archetype's
+      # own production image. Docker is the single requirement, so this runs identically on a
+      # laptop and on a runner.
+      - uses: prova-rs/run-action@v1
+        with:
+          # No `version:` — the engine version lives in run-action, which is bumped on every prova
+          # release. A local pin freezes the suite while looking up to date (E7).
+          profile: ci
+          # -U: floating plugin pins are tag-pins the git cache treats as immutable; force an
+          # update so a moved pin reaches a warm cache.
+          args: "-U"
