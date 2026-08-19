@@ -47,6 +47,9 @@ local archetype_spec = p6m.spec{
 
 prova.group("dotnet-basic: the archetype itself", function(g)
   p6m.standards.prompt_surface(g, archetype_spec, { resources = { "dotnet-resource-postgresql", "dotnet-resource-mysql", "dotnet-resource-redis", "dotnet-resource-kafka", "dotnet-resource-pulsar", "dotnet-resource-s3", "dotnet-resource-azure-blob" } })
+
+  -- S1c: the fleet's layout vocabulary, declared and pinned.
+  p6m.standards.layout(g, "basic")
 end)
 
 -- CI parity (S10): the rendered project's own build workflow path on a fresh clone, in the
