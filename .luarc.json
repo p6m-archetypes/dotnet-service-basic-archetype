@@ -3,6 +3,6 @@
   "workspace.checkThirdParty": false,
   "workspace.library": [
     "/Users/jimmie/.local/share/prova/lua/annotations",
-    "/Users/jimmie/.cache/prova/plugins/trees/efe96a1c616d797c/26e37df0af1a17680a3d5e14543a781fc72b6782/library"
+    "/Users/jimmie/work/p6m-archetypes3/prova-p6m-standards/library"
   ]
 }
